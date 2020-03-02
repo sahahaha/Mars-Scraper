@@ -23,7 +23,7 @@ def scrape():
     mars = mongo.db.mars
     mars_data = scrape_mars.scrape_all()
     mars.update({}, mars_data, upsert=True)
-    return "Scraping Successful!"
+    return "Scraping Successful! Go back to see it."
 
 
 if __name__ == "__main__":
