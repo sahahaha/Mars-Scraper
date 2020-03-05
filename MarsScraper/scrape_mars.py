@@ -2,6 +2,7 @@ from splinter import Browser
 from bs4 import BeautifulSoup
 import pandas as pd
 import datetime as dt
+import requests
 
 def scrape_all():
 
@@ -15,7 +16,8 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "hemispheres": hemispheres(browser),
-        "last_modified": dt.datetime.now()
+        "weather": twitter_weather(browser),
+        "facts": mars_facts()
     }
 
     # Stop webdriver and return data
@@ -92,19 +94,27 @@ def hemispheres(browser):
         
     return hemisphere_image_urls
 
-# def mars_facts():
-#     try:
-#         df = pd.read_html("http://space-facts.com/mars/")[1]
-#     except BaseException:
-#         return None
-    
-#     df.columns = ["description", "value"]
-#     df.set_index("description",inplace=True)
-    
-#     return df.to_html(classes="table table-striped")
+def mars_facts():
+    url = 'http://space-facts.com/mars/'
+    facts_table = pd.read_html(url)
+
+    df = facts_table[0]
+    df.columns = ['Parameter','Value']
+
+    facts_table = df.to_html()
+
+    return facts_table
+
+def twitter_weather(browser):
+    url = ('https://twitter.com/marswxreport?lang=en')
+    response = requests.get(url)
+    weather_soup = BeautifulSoup(response.text, 'html.parser')
+
+    mars_weather = weather_soup.find('div', class_='js-tweet-text-container').text.split('\n')[1]
+
+    return mars_weather
 
 if __name__ == "__main__":
 
     # If running as script, print scraped data
     print(scrape_all())
-
